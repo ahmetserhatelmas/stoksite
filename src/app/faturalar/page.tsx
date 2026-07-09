@@ -8,10 +8,10 @@ export default async function InvoicesPage() {
   return (
     <>
       <Navbar />
-      <main className="mx-auto max-w-7xl flex-1 px-4 py-8 sm:px-6">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-[#1e3a5f]">Faturalar</h1>
-          <p className="mt-2 text-slate-600">
+      <main className="mx-auto min-w-0 max-w-7xl flex-1 overflow-x-hidden px-4 py-6 sm:px-6 sm:py-8">
+        <div className="mb-6 sm:mb-8">
+          <h1 className="text-2xl font-bold text-[#1e3a5f] sm:text-3xl">Faturalar</h1>
+          <p className="mt-2 text-sm text-slate-600 sm:text-base">
             Geçmiş satış faturalarını görüntüleyin ve PDF olarak indirin.
           </p>
         </div>

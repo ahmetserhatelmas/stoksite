@@ -51,8 +51,8 @@ function OrderButtons({
 
 export function CategoryOrderManager({ categories }: Props) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white shadow-sm">
-      <div className="border-b border-slate-100 px-5 py-4">
+    <div className="min-w-0 max-w-full overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+      <div className="border-b border-slate-100 px-4 py-4 sm:px-5">
         <h2 className="text-lg font-semibold text-[#1e3a5f]">Kategori Sıralaması</h2>
         <p className="mt-1 text-sm text-slate-500">
           Ana sayfadaki kategori sırasını oklarla düzenleyin.
@@ -62,8 +62,8 @@ export function CategoryOrderManager({ categories }: Props) {
       <ul className="divide-y divide-slate-100">
         {categories.map((category, index) => (
           <li key={category.id}>
-            <div className="flex items-center gap-4 px-5 py-3">
-              <span className="w-6 text-sm font-medium text-slate-400">
+            <div className="flex items-center gap-2 px-3 py-3 sm:gap-4 sm:px-5">
+              <span className="w-5 shrink-0 text-sm font-medium text-slate-400 sm:w-6">
                 {index + 1}
               </span>
               <OrderButtons
@@ -71,8 +71,10 @@ export function CategoryOrderManager({ categories }: Props) {
                 isFirst={index === 0}
                 isLast={index === categories.length - 1}
               />
-              <div className="flex-1">
-                <p className="font-medium text-slate-900">{category.name}</p>
+              <div className="min-w-0 flex-1">
+                <p className="break-words font-medium text-slate-900">
+                  {category.name}
+                </p>
                 {category.children && category.children.length > 0 && (
                   <p className="text-xs text-slate-500">
                     {category.children.length} alt kategori
@@ -86,9 +88,9 @@ export function CategoryOrderManager({ categories }: Props) {
                 {category.children.map((child, childIndex) => (
                   <li
                     key={child.id}
-                    className="flex items-center gap-4 border-b border-slate-100 px-5 py-2.5 pl-16 last:border-b-0"
+                    className="flex items-center gap-2 border-b border-slate-100 px-3 py-2.5 pl-8 last:border-b-0 sm:gap-4 sm:px-5 sm:pl-16"
                   >
-                    <span className="w-6 text-xs text-slate-400">
+                    <span className="w-5 shrink-0 text-xs text-slate-400 sm:w-6">
                       {index + 1}.{childIndex + 1}
                     </span>
                     <OrderButtons
@@ -96,7 +98,9 @@ export function CategoryOrderManager({ categories }: Props) {
                       isFirst={childIndex === 0}
                       isLast={childIndex === category.children!.length - 1}
                     />
-                    <p className="text-sm text-slate-700">{child.name}</p>
+                    <p className="min-w-0 flex-1 break-words text-sm text-slate-700">
+                      {child.name}
+                    </p>
                   </li>
                 ))}
               </ul>

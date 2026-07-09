@@ -10,7 +10,7 @@ type Props = {
   product: ProductWithCategory;
 };
 
-export function ProductManageRow({ product }: Props) {
+function useProductManage(product: ProductWithCategory) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [stock, setStock] = useState(product.stock_quantity);
   const [price, setPrice] = useState(product.price);
@@ -56,40 +56,96 @@ export function ProductManageRow({ product }: Props) {
     });
   }
 
+  return {
+    fileInputRef,
+    stock,
+    setStock,
+    price,
+    setPrice,
+    imageUrl,
+    message,
+    isPending,
+    handleStockUpdate,
+    handleSave,
+    handleImageUpload,
+  };
+}
+
+function ProductImage({
+  imageUrl,
+  name,
+  fileInputRef,
+  isPending,
+  onUpload,
+}: {
+  imageUrl: string | null;
+  name: string;
+  fileInputRef: React.RefObject<HTMLInputElement | null>;
+  isPending: boolean;
+  onUpload: (file: File) => void;
+}) {
+  return (
+    <>
+      <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg border border-slate-200 bg-slate-50">
+        {imageUrl ? (
+          <Image
+            src={imageUrl}
+            alt={name}
+            fill
+            className="object-contain p-0.5"
+            sizes="56px"
+          />
+        ) : (
+          <div className="flex h-full items-center justify-center text-[10px] text-slate-400">
+            Yok
+          </div>
+        )}
+      </div>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) onUpload(file);
+        }}
+      />
+    </>
+  );
+}
+
+export function ProductManageRow({ product }: Props) {
+  const {
+    fileInputRef,
+    stock,
+    setStock,
+    price,
+    setPrice,
+    imageUrl,
+    message,
+    isPending,
+    handleStockUpdate,
+    handleSave,
+    handleImageUpload,
+  } = useProductManage(product);
+
   return (
     <tr className="border-b border-slate-100">
       <td className="px-4 py-3">
         <div className="flex items-center gap-3">
-          <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg border border-slate-200 bg-slate-50">
-            {imageUrl ? (
-              <Image
-                src={imageUrl}
-                alt={product.name}
-                fill
-                className="object-contain p-0.5"
-                sizes="56px"
-              />
-            ) : (
-              <div className="flex h-full items-center justify-center text-[10px] text-slate-400">
-                Yok
-              </div>
-            )}
-          </div>
-          <div>
+          <ProductImage
+            imageUrl={imageUrl}
+            name={product.name}
+            fileInputRef={fileInputRef}
+            isPending={isPending}
+            onUpload={handleImageUpload}
+          />
+          <div className="min-w-0">
             <p className="font-medium text-slate-900">{product.name}</p>
             <p className="text-xs text-slate-500">
               {product.categories?.name ?? "—"}
             </p>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) handleImageUpload(file);
-              }}
-            />
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
@@ -149,5 +205,103 @@ export function ProductManageRow({ product }: Props) {
         )}
       </td>
     </tr>
+  );
+}
+
+export function ProductManageCard({ product }: Props) {
+  const {
+    fileInputRef,
+    stock,
+    setStock,
+    price,
+    setPrice,
+    imageUrl,
+    message,
+    isPending,
+    handleStockUpdate,
+    handleSave,
+    handleImageUpload,
+  } = useProductManage(product);
+
+  return (
+    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+      <div className="flex gap-3">
+        <ProductImage
+          imageUrl={imageUrl}
+          name={product.name}
+          fileInputRef={fileInputRef}
+          isPending={isPending}
+          onUpload={handleImageUpload}
+        />
+        <div className="min-w-0 flex-1">
+          <p className="font-medium text-slate-900">{product.name}</p>
+          <p className="text-xs text-slate-500">
+            {product.categories?.name ?? "—"}
+          </p>
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            disabled={isPending}
+            className="mt-1 text-xs text-[#1e3a5f] hover:underline"
+          >
+            Görsel yükle
+          </button>
+        </div>
+      </div>
+
+      <div className="mt-4 grid grid-cols-2 gap-3">
+        <div>
+          <label className="mb-1 block text-xs text-slate-500">Fiyat</label>
+          <input
+            type="number"
+            min={0}
+            step={0.01}
+            value={price}
+            onChange={(e) => setPrice(parseFloat(e.target.value) || 0)}
+            className="w-full rounded border border-slate-300 px-2 py-2 text-sm"
+            disabled={isPending}
+          />
+        </div>
+        <div>
+          <label className="mb-1 block text-xs text-slate-500">Stok</label>
+          <div className="flex gap-2">
+            <input
+              type="number"
+              min={0}
+              value={stock}
+              onChange={(e) => setStock(parseInt(e.target.value, 10) || 0)}
+              className="min-w-0 flex-1 rounded border border-slate-300 px-2 py-2 text-sm"
+              disabled={isPending}
+            />
+            <button
+              type="button"
+              onClick={handleStockUpdate}
+              disabled={isPending}
+              className="shrink-0 rounded bg-slate-100 px-2 py-2 text-xs font-medium text-slate-700"
+            >
+              Stok
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="mt-3 flex items-center justify-between gap-3">
+        <p className="text-sm text-slate-600">
+          Değer: <span className="font-medium">{formatCurrency(price * stock)}</span>
+        </p>
+        <button
+          type="button"
+          onClick={handleSave}
+          disabled={isPending}
+          className="rounded-lg bg-[#1e3a5f] px-4 py-2 text-sm font-medium text-white hover:bg-[#152a45]"
+        >
+          Kaydet
+        </button>
+      </div>
+
+      {message && (
+        <p className="mt-2 text-xs text-green-600">{message}</p>
+      )}
+    </div>
   );
 }

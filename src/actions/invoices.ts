@@ -1,5 +1,6 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import type { Invoice, InvoiceWithItems } from "@/lib/types";
 
@@ -24,4 +25,16 @@ export async function getInvoiceById(id: string): Promise<InvoiceWithItems | nul
 
   if (error) return null;
   return data as InvoiceWithItems;
+}
+
+export async function deleteInvoice(invoiceId: string) {
+  const supabase = await createClient();
+  const { error } = await supabase.from("invoices").delete().eq("id", invoiceId);
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  revalidatePath("/faturalar");
+  return { success: true };
 }

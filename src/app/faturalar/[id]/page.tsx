@@ -19,8 +19,8 @@ export default async function InvoicePage({ params }: Props) {
   return (
     <>
       <Navbar />
-      <main className="mx-auto max-w-3xl flex-1 px-4 py-8 sm:px-6">
-        <div className="mb-6 flex items-center justify-between">
+      <main className="mx-auto min-w-0 max-w-3xl flex-1 overflow-x-hidden px-4 py-6 sm:px-6 sm:py-8">
+        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <Link
             href="/faturalar"
             className="text-sm text-[#1e3a5f] hover:underline"
@@ -29,7 +29,7 @@ export default async function InvoicePage({ params }: Props) {
           </Link>
           <a
             href={`/api/invoices/${invoice.id}/pdf`}
-            className="rounded-lg bg-green-700 px-4 py-2 text-sm font-medium text-white hover:bg-green-800"
+            className="inline-flex items-center justify-center rounded-lg bg-green-700 px-4 py-2 text-sm font-medium text-white hover:bg-green-800"
             download
           >
             PDF İndir

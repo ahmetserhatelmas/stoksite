@@ -6,12 +6,15 @@ import {
   StyleSheet,
 } from "@react-pdf/renderer";
 import type { InvoiceWithItems } from "@/lib/types";
+import { registerPdfFonts } from "@/lib/pdf-fonts";
+
+registerPdfFonts();
 
 const styles = StyleSheet.create({
   page: {
     padding: 40,
     fontSize: 11,
-    fontFamily: "Helvetica",
+    fontFamily: "Roboto",
   },
   header: {
     marginBottom: 30,
@@ -56,11 +59,16 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   totalLabel: { fontSize: 10, color: "#666" },
-  totalAmount: { fontSize: 18, fontWeight: "bold", color: "#1e3a5f", marginTop: 4 },
+  totalAmount: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#1e3a5f",
+    marginTop: 4,
+  },
 });
 
 function formatCurrency(amount: number) {
-  return `${amount.toLocaleString("tr-TR", { minimumFractionDigits: 2 })} ₺`;
+  return `${amount.toLocaleString("tr-TR", { minimumFractionDigits: 2 })} TL`;
 }
 
 function formatDate(date: string) {

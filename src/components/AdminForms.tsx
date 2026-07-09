@@ -37,20 +37,23 @@ export function AdminForms({ categories }: Props) {
   }
 
   return (
-    <div className="grid gap-6 lg:grid-cols-2">
-      <form action={handleCreateProduct} className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+    <div className="grid min-w-0 grid-cols-1 gap-6 lg:grid-cols-2">
+      <form
+        action={handleCreateProduct}
+        className="min-w-0 max-w-full rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6"
+      >
         <h3 className="mb-4 text-lg font-semibold text-[#1e3a5f]">Yeni Ürün Ekle</h3>
         <div className="space-y-3">
           <input
             name="name"
             placeholder="Ürün adı"
             required
-            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+            className="w-full min-w-0 rounded-lg border border-slate-300 px-3 py-2 text-sm"
           />
           <select
             name="category_id"
             required
-            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+            className="w-full min-w-0 rounded-lg border border-slate-300 px-3 py-2 text-sm"
           >
             <option value="">Kategori seçin</option>
             {flatCategories.map((cat) => (
@@ -63,26 +66,44 @@ export function AdminForms({ categories }: Props) {
             name="description"
             placeholder="Açıklama (opsiyonel)"
             rows={2}
-            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+            className="w-full min-w-0 rounded-lg border border-slate-300 px-3 py-2 text-sm"
           />
-          <div className="grid grid-cols-2 gap-3">
-            <input
-              name="price"
-              type="number"
-              min={0}
-              step={0.01}
-              placeholder="Fiyat (₺)"
-              defaultValue={0}
-              className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
-            />
-            <input
-              name="stock_quantity"
-              type="number"
-              min={0}
-              placeholder="Stok adedi"
-              defaultValue={0}
-              className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
-            />
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div>
+              <label
+                htmlFor="product-price"
+                className="mb-1 block text-sm font-medium text-slate-700"
+              >
+                Fiyat (₺)
+              </label>
+              <input
+                id="product-price"
+                name="price"
+                type="number"
+                min={0}
+                step={0.01}
+                placeholder="0,00"
+                defaultValue={0}
+                className="w-full min-w-0 rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="product-stock"
+                className="mb-1 block text-sm font-medium text-slate-700"
+              >
+                Stok Adedi
+              </label>
+              <input
+                id="product-stock"
+                name="stock_quantity"
+                type="number"
+                min={0}
+                placeholder="0"
+                defaultValue={0}
+                className="w-full min-w-0 rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              />
+            </div>
           </div>
           <button
             type="submit"
@@ -94,18 +115,21 @@ export function AdminForms({ categories }: Props) {
         </div>
       </form>
 
-      <form action={handleCreateCategory} className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+      <form
+        action={handleCreateCategory}
+        className="min-w-0 max-w-full rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6"
+      >
         <h3 className="mb-4 text-lg font-semibold text-[#1e3a5f]">Yeni Kategori Ekle</h3>
         <div className="space-y-3">
           <input
             name="name"
             placeholder="Kategori adı"
             required
-            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+            className="w-full min-w-0 rounded-lg border border-slate-300 px-3 py-2 text-sm"
           />
           <select
             name="parent_id"
-            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+            className="w-full min-w-0 rounded-lg border border-slate-300 px-3 py-2 text-sm"
           >
             <option value="">Ana kategori (üst yok)</option>
             {categories.map((cat) => (
