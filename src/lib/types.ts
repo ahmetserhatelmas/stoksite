@@ -47,3 +47,8 @@ export type CategoryWithChildren = Category & {
 export type ProductWithCategory = Product & {
   categories: Pick<Category, "id" | "name" | "slug"> | null;
 };
+
+export type CartItem = {
+  product: Product;
+  quantity: number;
+};

@@ -1,22 +1,27 @@
-import { Navbar } from "@/components/Navbar";
-import { CategoryGrid } from "@/components/CategoryGrid";
+import { OrderScreen } from "@/components/order/OrderScreen";
 import { getCategories } from "@/actions/categories";
+import { getAllProducts } from "@/actions/products";
 
 export default async function HomePage() {
-  const categories = await getCategories();
+  const [categories, products] = await Promise.all([
+    getCategories(),
+    getAllProducts(),
+  ]);
 
   return (
-    <>
-      <Navbar />
-      <main className="mx-auto max-w-7xl flex-1 px-4 py-8 sm:px-6">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-[#1e3a5f]">Ürün Kategorileri</h1>
-          <p className="mt-2 text-slate-600">
-            Kategori seçerek ürünleri görüntüleyin ve satış yapın.
-          </p>
-        </div>
-        <CategoryGrid categories={categories} />
-      </main>
-    </>
+    <OrderScreen
+      categories={categories}
+      products={products.map((p) => ({
+        id: p.id,
+        category_id: p.category_id,
+        name: p.name,
+        description: p.description,
+        price: Number(p.price),
+        stock_quantity: p.stock_quantity,
+        image_url: p.image_url,
+        created_at: p.created_at,
+        updated_at: p.updated_at,
+      }))}
+    />
   );
 }
