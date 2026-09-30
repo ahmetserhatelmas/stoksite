@@ -12,6 +12,8 @@ import {
   getProductsByCategory,
   getProductsByCategoryIds,
 } from "@/actions/products";
+import { getSession } from "@/lib/session";
+import { getUnreadConversationCount } from "@/actions/messages";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -19,6 +21,10 @@ type Props = {
 
 export default async function CategoryPage({ params }: Props) {
   const { slug } = await params;
+  const user = await getSession();
+  const unreadConversations = user
+    ? await getUnreadConversationCount()
+    : 0;
   const category = await getCategoryBySlug(slug);
 
   if (!category) {
@@ -49,7 +55,7 @@ export default async function CategoryPage({ params }: Props) {
 
   return (
     <>
-      <Navbar />
+      <Navbar user={user} unreadConversations={unreadConversations} />
       <main className="mx-auto max-w-7xl flex-1 px-4 py-8 sm:px-6">
         <nav className="mb-6 text-sm text-slate-500">
           <Link href="/" className="hover:text-[#1e3a5f]">

@@ -19,11 +19,23 @@ export type Product = {
   updated_at: string;
 };
 
+export type Customer = {
+  id: string;
+  name: string;
+  code: string | null;
+  phone: string | null;
+  note: string | null;
+  created_at: string;
+};
+
 export type Invoice = {
   id: string;
   invoice_number: string;
   total_amount: number;
   created_at: string;
+  customer_id: string | null;
+  customer_name: string | null;
+  invoice_date: string | null;
 };
 
 export type InvoiceItem = {
@@ -34,6 +46,7 @@ export type InvoiceItem = {
   quantity: number;
   unit_price: number;
   subtotal: number;
+  delivered: boolean;
 };
 
 export type InvoiceWithItems = Invoice & {
@@ -51,4 +64,23 @@ export type ProductWithCategory = Product & {
 export type CartItem = {
   product: Product;
   quantity: number;
+};
+
+export type AppUser = {
+  id: string;
+  name: string;
+  username: string;
+  role: "admin" | "user";
+  created_at: string;
+};
+
+export type Message = {
+  id: string;
+  sender_id: string;
+  receiver_id: string;
+  body: string;
+  is_read: boolean;
+  created_at: string;
+  sender?: Pick<AppUser, "id" | "name" | "username" | "role"> | null;
+  receiver?: Pick<AppUser, "id" | "name" | "username" | "role"> | null;
 };

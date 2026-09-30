@@ -7,8 +7,16 @@ import {
 } from "@/components/ProductManageRow";
 import { getCategories } from "@/actions/categories";
 import { getAllProducts } from "@/actions/products";
+import { getSession } from "@/lib/session";
+import { getUnreadConversationCount } from "@/actions/messages";
+import { CariImportButton } from "@/components/CariImportButton";
+import { StockImportButton } from "@/components/StockImportButton";
 
 export default async function AdminPage() {
+  const user = await getSession();
+  const unreadConversations = user
+    ? await getUnreadConversationCount()
+    : 0;
   const [categories, products] = await Promise.all([
     getCategories(),
     getAllProducts(),
@@ -16,7 +24,7 @@ export default async function AdminPage() {
 
   return (
     <>
-      <Navbar />
+      <Navbar user={user} unreadConversations={unreadConversations} />
       <main className="mx-auto min-w-0 max-w-7xl flex-1 overflow-x-hidden px-4 py-6 sm:px-6 sm:py-8">
         <div className="mb-6 sm:mb-8">
           <h1 className="text-2xl font-bold text-[#1e3a5f] sm:text-3xl">
@@ -26,6 +34,13 @@ export default async function AdminPage() {
             Ürün ve kategori ekleyin, stok adetlerini güncelleyin.
           </p>
         </div>
+
+        {user?.role === "admin" && (
+          <div className="mb-6 grid gap-4 lg:grid-cols-2">
+            <StockImportButton />
+            <CariImportButton />
+          </div>
+        )}
 
         <AdminForms categories={categories} />
 

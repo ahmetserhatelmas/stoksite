@@ -1,0 +1,15 @@
+export const colors = {
+  navy: "#1e3a5f",
+  navyDark: "#152a45",
+  bar: "#2b2b2b",
+  gold: "#d4af37",
+  goldSoft: "#e0c04a",
+  bg: "#f1f5f9",
+  card: "#ffffff",
+  text: "#1a1a1a",
+  muted: "#64748b",
+  hint: "#334155",
+  line: "#e2e8f0",
+  danger: "#dc2626",
+  success: "#059669",
+};

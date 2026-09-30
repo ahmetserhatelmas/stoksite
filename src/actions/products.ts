@@ -4,18 +4,39 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import type { Product, ProductWithCategory } from "@/lib/types";
 
+const PAGE_SIZE = 1000;
+
+async function fetchProductPages<T>(
+  build: (from: number, to: number) => PromiseLike<{
+    data: T[] | null;
+    error: { message: string } | null;
+  }>
+): Promise<T[]> {
+  const rows: T[] = [];
+  let from = 0;
+  while (true) {
+    const { data, error } = await build(from, from + PAGE_SIZE - 1);
+    if (error) throw new Error(error.message);
+    const page = data ?? [];
+    rows.push(...page);
+    if (page.length < PAGE_SIZE) break;
+    from += PAGE_SIZE;
+  }
+  return rows;
+}
+
 export async function getProductsByCategory(
   categoryId: string
 ): Promise<Product[]> {
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("products")
-    .select("*")
-    .eq("category_id", categoryId)
-    .order("name");
-
-  if (error) throw new Error(error.message);
-  return data as Product[];
+  return fetchProductPages((from, to) =>
+    supabase
+      .from("products")
+      .select("*")
+      .eq("category_id", categoryId)
+      .order("name")
+      .range(from, to)
+  );
 }
 
 export async function getProductsByCategoryIds(
@@ -24,25 +45,37 @@ export async function getProductsByCategoryIds(
   if (categoryIds.length === 0) return [];
 
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("products")
-    .select("*")
-    .in("category_id", categoryIds)
-    .order("name");
-
-  if (error) throw new Error(error.message);
-  return data as Product[];
+  return fetchProductPages((from, to) =>
+    supabase
+      .from("products")
+      .select("*")
+      .in("category_id", categoryIds)
+      .order("name")
+      .range(from, to)
+  );
 }
 
 export async function getAllProducts(): Promise<ProductWithCategory[]> {
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("products")
-    .select("*, categories(id, name, slug)")
-    .order("name");
+  return fetchProductPages((from, to) =>
+    supabase
+      .from("products")
+      .select("*, categories(id, name, slug)")
+      .order("name")
+      .range(from, to)
+  );
+}
 
-  if (error) throw new Error(error.message);
-  return data as ProductWithCategory[];
+export async function getProductCountsByCategory(): Promise<Record<string, number>> {
+  const supabase = await createClient();
+  const rows = await fetchProductPages<{ category_id: string }>((from, to) =>
+    supabase.from("products").select("category_id").range(from, to)
+  );
+  const counts: Record<string, number> = {};
+  for (const row of rows) {
+    counts[row.category_id] = (counts[row.category_id] ?? 0) + 1;
+  }
+  return counts;
 }
 
 export async function createProduct(formData: FormData) {

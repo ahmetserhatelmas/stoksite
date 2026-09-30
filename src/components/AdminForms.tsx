@@ -79,11 +79,16 @@ export function AdminForms({ categories }: Props) {
               <input
                 id="product-price"
                 name="price"
-                type="number"
-                min={0}
-                step={0.01}
+                type="text"
+                inputMode="decimal"
                 placeholder="0,00"
-                defaultValue={0}
+                defaultValue="0"
+                onChange={(e) => {
+                  const cleaned = e.target.value.replace(",", ".").replace(/[^\d.]/g, "");
+                  const [whole, ...rest] = cleaned.split(".");
+                  e.target.value =
+                    rest.length > 0 ? `${whole}.${rest.join("").replace(/\./g, "")}` : whole;
+                }}
                 className="w-full min-w-0 rounded-lg border border-slate-300 px-3 py-2 text-sm"
               />
             </div>
@@ -97,10 +102,13 @@ export function AdminForms({ categories }: Props) {
               <input
                 id="product-stock"
                 name="stock_quantity"
-                type="number"
-                min={0}
+                type="text"
+                inputMode="numeric"
                 placeholder="0"
-                defaultValue={0}
+                defaultValue="0"
+                onChange={(e) => {
+                  e.target.value = e.target.value.replace(/\D/g, "");
+                }}
                 className="w-full min-w-0 rounded-lg border border-slate-300 px-3 py-2 text-sm"
               />
             </div>

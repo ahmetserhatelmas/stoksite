@@ -1,16 +1,29 @@
 import { OrderScreen } from "@/components/order/OrderScreen";
 import { getCategories } from "@/actions/categories";
-import { getAllProducts } from "@/actions/products";
+import { getCustomers } from "@/actions/customers";
+import { getAllProducts, getProductCountsByCategory } from "@/actions/products";
+import { getSession } from "@/lib/session";
+import { getUnreadConversationCount } from "@/actions/messages";
 
 export default async function HomePage() {
-  const [categories, products] = await Promise.all([
+  const [categories, products, customers, user, productCounts] = await Promise.all([
     getCategories(),
     getAllProducts(),
+    getCustomers().catch(() => []),
+    getSession(),
+    getProductCountsByCategory(),
   ]);
+  const unreadConversations = user
+    ? await getUnreadConversationCount()
+    : 0;
 
   return (
     <OrderScreen
+      user={user}
+      unreadConversations={unreadConversations}
       categories={categories}
+      customers={customers}
+      productCounts={productCounts}
       products={products.map((p) => ({
         id: p.id,
         category_id: p.category_id,

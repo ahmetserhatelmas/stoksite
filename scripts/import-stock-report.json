@@ -1,0 +1,209 @@
+{
+  "excel_products": 2424,
+  "matched_photos": 101,
+  "extra_website_products": 458,
+  "downloaded": 524,
+  "download_failed": 0,
+  "sample_matches": [
+    {
+      "excel": "KALE SİLİNDİRLİ KİLİT NİKEL 3 MİLLİ ( 2000 )",
+      "image": "/products/assos/001-06-152r3mr-kale-silindirli-kilit-nikel-3-milli-2000.jpg",
+      "how": "code"
+    },
+    {
+      "excel": "KALE BAS - AÇ 1000 KG. ( Serbest Geçiş )",
+      "image": "/products/assos/002-02-kd20-311-kale-bas-ac-1000-kg-serbest-gecis.jpg",
+      "how": "code"
+    },
+    {
+      "excel": "Multilock 415G GÖVDE Barelsiz",
+      "image": "/products/assos/009-01-41501-multilock-415g-govde-barelsiz.jpg",
+      "how": "code"
+    },
+    {
+      "excel": "Multilock 415G MERKEZİ KİLİT SETİ 7x7 Barelli",
+      "image": "/products/assos/009-01-4155100-multilock-415g-merkezi-kilit-seti-7x7-barelli.jpg",
+      "how": "code"
+    },
+    {
+      "excel": "Multilock 415G MERKEZİ KİLİT Integratör Barelli",
+      "image": "/products/assos/009-01-4155300-multilock-415g-merkezi-kilit-integrator-barelli.jpg",
+      "how": "code"
+    },
+    {
+      "excel": "Assa Abloy DC 120 HİDROLİK Dirsek Kollu",
+      "image": "/products/assos/009-05-01-01-assa-abloy-dc-120-hidrolik-dirsek-kollu.jpg",
+      "how": "code"
+    },
+    {
+      "excel": "Assa Abloy DC 300 HİDROLİK Dirsek Kollu",
+      "image": "/products/assos/009-05-02-01-assa-abloy-dc-300-hidrolik-dirsek-kollu.jpg",
+      "how": "code"
+    },
+    {
+      "excel": "Assa Abloy DC 300 HİDROLİK Kayar Kollu",
+      "image": "/products/assos/009-05-02-02-assa-abloy-dc-300-hidrolik-kayar-kollu.jpg",
+      "how": "code"
+    },
+    {
+      "excel": "YALE 1380 KAYAR KOLLU HİDROLİK 3 NM. GÜMÜŞ",
+      "image": "/products/assos/010-04-01-01-yale-1380-kayar-kollu-hidrolik-3-nm-gumus.jpg",
+      "how": "code"
+    },
+    {
+      "excel": "YALE KAPI HİDROLİĞİ 1380 ANKASTRE",
+      "image": "/products/assos/010-04-01-02-yale-kapi-hidroligi-1380-ankastre.jpg",
+      "how": "code"
+    },
+    {
+      "excel": "YALE LCD EKRANLI DÜRBÜN 5000 SERİSİ - PREMİUM",
+      "image": "/products/assos/010-07-1435-yale-lcd-ekranli-durbun-5000-serisi-premium.jpg",
+      "how": "code"
+    },
+    {
+      "excel": "YALE LCD EKRANLI DÜRBÜN 5800 SERİSİ",
+      "image": "/products/assos/010-07-1443-yale-lcd-ekranli-durbun-5800-serisi.jpg",
+      "how": "code"
+    },
+    {
+      "excel": "YALE YARI MERKEZİ KİLİT YM354 ( Yale Barelli )",
+      "image": "/products/assos/010-10-01-01-yale-yari-merkezi-kilit-ym354-yale-barelli.jpg",
+      "how": "code"
+    },
+    {
+      "excel": "YALE YARI MERKEZİ KİLİT YM354",
+      "image": "/products/assos/010-10-01-02-yale-yari-merkezi-kilit-ym354.jpg",
+      "how": "exact"
+    },
+    {
+      "excel": "YALE YDM3168 KARTLI ŞİFRELİ DİJİTAL KİLİT",
+      "image": "/products/assos/010-15-01-01-yale-ydm3168-kartli-sifreli-dijital-kilit.jpg",
+      "how": "code"
+    },
+    {
+      "excel": "YALE YDM4109 PARMAK İZLİ ŞİFRELİ DİJİTAL KİLİT",
+      "image": "/products/assos/010-15-01-02-yale-ydm4109-parmak-izli-sifreli-dijital-kilit.jpg",
+      "how": "code"
+    },
+    {
+      "excel": "YALE YDM3109 KARTLI ŞİFRELİ DİJİTAL KİLİT",
+      "image": "/products/assos/010-15-01-03-yale-ydm3109-kartli-sifreli-dijital-kilit.jpg",
+      "how": "code"
+    },
+    {
+      "excel": "YALE YDG313 KARTLI VE ŞİFRELİ DİJİTAL KİLİT",
+      "image": "/products/assos/010-15-01-04-yale-ydg313-kartli-ve-sifreli-dijital-kilit.jpg",
+      "how": "code"
+    },
+    {
+      "excel": "YALE YDR323 KARTLI VE ŞİFRELİ DİJİTAL KİLİT",
+      "image": "/products/assos/010-15-01-05-yale-ydr323-kartli-ve-sifreli-dijital-kilit.jpg",
+      "how": "code"
+    },
+    {
+      "excel": "YALE YDR3110 KARTLI VE ŞİFRELİ DİJİTAL KİLİT",
+      "image": "/products/assos/010-15-01-06-yale-ydr3110-kartli-ve-sifreli-dijital-kilit.jpg",
+      "how": "code"
+    },
+    {
+      "excel": "YALE YU250M ELEKTROMANYETİK KİLİT 250 KG",
+      "image": "/products/assos/010-16-01-01-yale-yu250m-elektromanyetik-kilit-250-kg.jpg",
+      "how": "code"
+    },
+    {
+      "excel": "YALE LİNUS AKILLI TUŞ TAKIMI",
+      "image": "/products/assos/010-17-02-01-yale-linus-akilli-tus-takimi.jpg",
+      "how": "exact"
+    },
+    {
+      "excel": "YALE YANGIN SERTİFİKALI KASA YFM/352/FG2/B",
+      "image": "/products/assos/010-20-01-01-yale-yangin-sertifikali-kasa-yfm-352-fg2-b.jpg",
+      "how": "code"
+    },
+    {
+      "excel": "YALE YANGIN SERTİFİKALI KASA YFM/420/FG2",
+      "image": "/products/assos/010-20-01-02-yale-yangin-sertifikali-kasa-yfm-420-fg2.jpg",
+      "how": "code"
+    },
+    {
+      "excel": "YALE YANGIN SERTİFİKALI KASA YFM/520/FG2",
+      "image": "/products/assos/010-20-01-03-yale-yangin-sertifikali-kasa-yfm-520-fg2.jpg",
+      "how": "code"
+    },
+    {
+      "excel": "YALE YANGIN SERTİFİKALI KASA YFM/695/FG2",
+      "image": "/products/assos/010-20-01-04-yale-yangin-sertifikali-kasa-yfm-695-fg2.jpg",
+      "how": "code"
+    },
+    {
+      "excel": "YALE MAKS.GÜV.SERTİFİKALI KASA YLEM/200/EG1",
+      "image": "/products/assos/010-23-01-02-yale-maks-guv-sertifikali-kasa-ylem-200-eg1.jpg",
+      "how": "code"
+    },
+    {
+      "excel": "YALE YANGINA SUYA DAYANIKLI YFWC/155/KB1",
+      "image": "/products/assos/010-23-01-04-yale-yangina-suya-dayanikli-yfwc-155-kb1.jpg",
+      "how": "code"
+    },
+    {
+      "excel": "YALE YANGINA SUYA DAYANIKLI YFWC/329/KB1",
+      "image": "/products/assos/010-23-01-05-yale-yangina-suya-dayanikli-yfwc-329-kb1.jpg",
+      "how": "code"
+    },
+    {
+      "excel": "YALE MAKS.GÜVENLİK SERTİF.KASA YSEM/520/EG1",
+      "image": "/products/assos/010-25-01-01-yale-maks-guvenlik-sertif-kasa-ysem-520-eg1.jpg",
+      "how": "code"
+    },
+    {
+      "excel": "YALE DİJ.KASA LCD EKRANLI KÜÇÜK BOY Y-SS0000NFP",
+      "image": "/products/assos/010-28-01-01-yale-dij-kasa-lcd-ekranli-kucuk-boy-y-ss0000nfp.jpg",
+      "how": "code"
+    },
+    {
+      "excel": "YALE DİJ. KASA LCD EKRANLI LAPTOP TİPİ Y-LTS0000",
+      "image": "/products/assos/010-28-01-03-yale-dij-kasa-lcd-ekranli-laptop-tipi-y-lts0000.jpg",
+      "how": "code"
+    },
+    {
+      "excel": "YALE EKO SERİ KASA SİYAH YSV/170/DB1",
+      "image": "/products/assos/010-29-01-01-yale-eko-seri-kasa-siyah-ysv-170-db1.jpg",
+      "how": "code"
+    },
+    {
+      "excel": "YALE KASA DİJİTAL OFİS TİPİ YSV/390/DB1",
+      "image": "/products/assos/010-29-01-06-yale-kasa-dijital-ofis-tipi-ysv-390-db1.jpg",
+      "how": "code"
+    },
+    {
+      "excel": "YALE ALARMLI DİJİTAL KASA ORTA BOY YEC/250/DB1",
+      "image": "/products/assos/010-29-02-02-yale-alarmli-dijital-kasa-orta-boy-yec-250-db1.jpg",
+      "how": "code"
+    },
+    {
+      "excel": "YALE DÜRBÜN KAMERASI 5000 SERİSİ",
+      "image": "/products/assos/010-90-01-02-yale-durbun-kamerasi-5000-serisi.jpg",
+      "how": "code"
+    },
+    {
+      "excel": "YALE DÜRBÜN KAMERASI 5800 SERİSİ",
+      "image": "/products/assos/010-90-01-03-yale-durbun-kamerasi-5800-serisi.jpg",
+      "how": "code"
+    },
+    {
+      "excel": "DESİ UTOPİC R UBF2C 100 Parmak izli BLE",
+      "image": "/products/assos/012-03-01-01-desi-utopic-r-ubf2c-100-parmak-izli-ble.jpg",
+      "how": "code"
+    },
+    {
+      "excel": "DESİ UTOPİC R UBC 100 Motorlu Barel BLE",
+      "image": "/products/assos/012-03-02-01-desi-utopic-r-ubc-100-motorlu-barel-ble.jpg",
+      "how": "code"
+    },
+    {
+      "excel": "DESİ UTOPIC UBC 100 ONKEY TİP A",
+      "image": "/products/assos/012-03-05-01-desi-utopic-ubc-100-onkey-tip-a.jpg",
+      "how": "code"
+    }
+  ]
+}

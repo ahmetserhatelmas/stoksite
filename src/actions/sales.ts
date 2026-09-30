@@ -8,11 +8,19 @@ export type OrderItemInput = {
   quantity: number;
 };
 
+export type SellOrderOptions = {
+  customerId?: string | null;
+  customerName?: string | null;
+};
+
 export async function sellProduct(productId: string, quantity: number) {
   return sellOrder([{ productId, quantity }]);
 }
 
-export async function sellOrder(items: OrderItemInput[]) {
+export async function sellOrder(
+  items: OrderItemInput[],
+  options: SellOrderOptions = {}
+) {
   const cleaned = items
     .map((item) => ({
       product_id: item.productId,
@@ -30,7 +38,6 @@ export async function sellOrder(items: OrderItemInput[]) {
   });
 
   if (error) {
-    // Eski tek ürün fonksiyonuna düş (henüz sell_order kurulmadıysa)
     if (
       cleaned.length === 1 &&
       (error.message.includes("sell_order") ||
@@ -44,6 +51,7 @@ export async function sellOrder(items: OrderItemInput[]) {
         return { error: single.error.message };
       }
       const result = Array.isArray(single.data) ? single.data[0] : single.data;
+      await attachCustomerToInvoice(result?.invoice_id as string, options);
       revalidatePath("/");
       revalidatePath("/faturalar");
       return {
@@ -56,6 +64,7 @@ export async function sellOrder(items: OrderItemInput[]) {
   }
 
   const result = Array.isArray(data) ? data[0] : data;
+  await attachCustomerToInvoice(result?.invoice_id as string, options);
 
   revalidatePath("/");
   revalidatePath("/faturalar");
@@ -65,4 +74,20 @@ export async function sellOrder(items: OrderItemInput[]) {
     invoiceId: result?.invoice_id as string,
     invoiceNumber: result?.invoice_number as string,
   };
+}
+
+async function attachCustomerToInvoice(
+  invoiceId: string | undefined,
+  options: SellOrderOptions
+) {
+  if (!invoiceId) return;
+  const supabase = await createClient();
+  await supabase
+    .from("invoices")
+    .update({
+      customer_id: options.customerId ?? null,
+      customer_name: options.customerName ?? null,
+      invoice_date: new Date().toISOString(),
+    })
+    .eq("id", invoiceId);
 }

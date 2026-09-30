@@ -1,7 +1,7 @@
 "use client";
 
-import Image from "next/image";
 import { useState, useTransition } from "react";
+import { ProductPhoto } from "@/components/ProductPhoto";
 import { useRouter } from "next/navigation";
 import type { Product } from "@/lib/types";
 import { formatCurrency } from "@/lib/utils";
@@ -72,13 +72,7 @@ export function ProductCard({ product, categoryName }: Props) {
       <article className="flex flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
         <div className="relative aspect-square w-full bg-white">
           {product.image_url ? (
-            <Image
-              src={product.image_url}
-              alt={product.name}
-              fill
-              className="object-contain p-2"
-              sizes="(max-width: 768px) 100vw, 280px"
-            />
+            <ProductPhoto src={product.image_url} alt={product.name} />
           ) : (
             <>
               <div className="flex items-start justify-between bg-slate-50 px-4 py-3">

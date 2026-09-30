@@ -83,7 +83,12 @@ export function InvoicePDF({ invoice }: { invoice: InvoiceWithItems }) {
           <Text style={styles.title}>FATURA</Text>
           <Text style={styles.subtitle}>Assos Metal Stok Yönetimi</Text>
           <Text style={styles.meta}>Fatura No: {invoice.invoice_number}</Text>
-          <Text style={styles.meta}>Tarih: {formatDate(invoice.created_at)}</Text>
+          <Text style={styles.meta}>
+            Tarih: {formatDate(invoice.invoice_date ?? invoice.created_at)}
+          </Text>
+          {invoice.customer_name ? (
+            <Text style={styles.meta}>Cari: {invoice.customer_name}</Text>
+          ) : null}
         </View>
 
         <View style={styles.tableHeader}>
@@ -95,7 +100,10 @@ export function InvoicePDF({ invoice }: { invoice: InvoiceWithItems }) {
 
         {invoice.invoice_items.map((item) => (
           <View key={item.id} style={styles.row}>
-            <Text style={styles.colProduct}>{item.product_name}</Text>
+            <Text style={styles.colProduct}>
+              {item.delivered ? "[V] " : ""}
+              {item.product_name}
+            </Text>
             <Text style={styles.colQty}>{item.quantity}</Text>
             <Text style={styles.colPrice}>{formatCurrency(item.unit_price)}</Text>
             <Text style={styles.colTotal}>{formatCurrency(item.subtotal)}</Text>
