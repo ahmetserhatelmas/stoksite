@@ -18,8 +18,18 @@
       }
     },
     "production": {
+      "autoIncrement": true,
       "android": {
         "buildType": "app-bundle"
+      }
+    }
+  },
+  "submit": {
+    "production": {
+      "ios": {
+        "appleId": "ahmetserhatelmas@hotmail.com",
+        "appleTeamId": "C2UZ32H8YZ",
+        "ascAppId": "6817747739"
       }
     }
   }

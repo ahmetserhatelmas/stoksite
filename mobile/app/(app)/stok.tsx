@@ -155,7 +155,13 @@ const StockCard = memo(function StockCard({
   return (
     <View style={styles.card}>
       {image ? (
-        <Image source={{ uri: image }} style={styles.image} contentFit="cover" />
+        <Image
+          source={{ uri: image }}
+          style={styles.image}
+          contentFit="cover"
+          recyclingKey={product.id}
+          transition={0}
+        />
       ) : (
         <View style={[styles.image, styles.emptyImage]} />
       )}

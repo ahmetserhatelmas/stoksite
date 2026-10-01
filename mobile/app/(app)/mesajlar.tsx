@@ -10,11 +10,11 @@ import {
   StyleSheet,
   Text,
   TextInput,
-  useWindowDimensions,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuth } from "../../src/context/AuthContext";
+import { useWideLayout } from "../../src/lib/layout";
 import { sx } from "../../src/lib/style";
 import {
   getMessages,
@@ -28,7 +28,7 @@ import type { AppUser, Message } from "../../src/lib/types";
 export default function MessagesScreen() {
   const { user, refreshUnread } = useAuth();
   const insets = useSafeAreaInsets();
-  const tablet = useWindowDimensions().width >= 768;
+  const { wide } = useWideLayout();
   const threadRef = useRef<FlatList<Message>>(null);
   const [users, setUsers] = useState<AppUser[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -116,7 +116,7 @@ export default function MessagesScreen() {
   }
 
   const peopleList = (
-    <View style={styles.list}>
+    <View style={wide ? styles.listWide : styles.list}>
       <TextInput
         value={userQuery}
         onChangeText={setUserQuery}
@@ -156,7 +156,7 @@ export default function MessagesScreen() {
   );
 
   const composerPad = keyboardOpen ? 8 : Math.max(insets.bottom, 10);
-  const keyboardOffset = tablet ? insets.top : insets.top + 52;
+  const keyboardOffset = wide ? insets.top : insets.top + 52;
 
   const chat = (
     <KeyboardAvoidingView
@@ -164,7 +164,7 @@ export default function MessagesScreen() {
       behavior={Platform.OS === "ios" ? "padding" : undefined}
       keyboardVerticalOffset={keyboardOffset}
     >
-      {!tablet && selectedId ? (
+      {!wide && selectedId ? (
         <Pressable onPress={() => setSelectedId(null)} style={styles.back}>
           <Text style={styles.backText}>← Kişiler</Text>
         </Pressable>
@@ -208,9 +208,9 @@ export default function MessagesScreen() {
   );
 
   return (
-    <View style={tablet ? styles.pageRow : styles.pageCol}>
-      {tablet || !selectedId ? peopleList : null}
-      {tablet || selectedId ? chat : null}
+    <View style={wide ? styles.pageRow : styles.pageCol}>
+      {wide || !selectedId ? peopleList : null}
+      {wide || selectedId ? chat : null}
     </View>
   );
 }
@@ -220,6 +220,7 @@ const styles = StyleSheet.create({
   pageCol: { flex: 1 },
   center: { flex: 1, alignItems: "center", justifyContent: "center" },
   list: { flex: 1, backgroundColor: "#fff" },
+  listWide: { width: 320, backgroundColor: "#fff", borderRightWidth: 1, borderColor: colors.line },
   search: {
     margin: 12,
     backgroundColor: "#fff",

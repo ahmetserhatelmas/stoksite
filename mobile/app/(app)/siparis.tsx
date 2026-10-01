@@ -1,6 +1,6 @@
 import { Image } from "expo-image";
 import { useFocusEffect, useRouter } from "expo-router";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -14,7 +14,6 @@ import {
   StyleSheet,
   Text,
   TextInput,
-  useWindowDimensions,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -29,9 +28,81 @@ import {
   sellOrder,
 } from "../../src/lib/api";
 import { customerCode, customerLabel } from "../../src/lib/customer-code";
+import { useWideLayout } from "../../src/lib/layout";
 import { colors } from "../../src/lib/theme";
 import type { CategoryWithChildren, Customer, Product } from "../../src/lib/types";
 import { formatCurrency, resolveImageUrl } from "../../src/lib/utils";
+
+let draftCart: Record<string, number> = {};
+let draftCustomerId: string | null = null;
+
+const ProductCard = memo(function ProductCard({
+  item,
+  qty,
+  columns,
+  cardWidth,
+  onOpen,
+  onQty,
+}: {
+  item: Product;
+  qty: number;
+  columns: number;
+  cardWidth?: number;
+  onOpen: (id: string) => void;
+  onQty: (id: string, qty: number) => void;
+}) {
+  const image = resolveImageUrl(item.image_url);
+  const photo = image ? (
+    <Image
+      source={{ uri: image }}
+      style={columns > 1 ? styles.image : styles.thumb}
+      contentFit="cover"
+      recyclingKey={item.id}
+      transition={0}
+    />
+  ) : (
+    <View style={columns > 1 ? styles.imageEmpty : styles.thumbEmpty}>
+      <Text style={styles.muted}>Foto yok</Text>
+    </View>
+  );
+  const stepper = (
+    <QuantityStepper value={qty} max={item.stock_quantity} onChange={(next) => onQty(item.id, next)} />
+  );
+
+  if (columns === 1) {
+    return (
+      <View style={styles.cardPhone}>
+        <Pressable onPress={() => onOpen(item.id)}>{photo}</Pressable>
+        <View style={styles.cardBody}>
+          <Pressable onPress={() => onOpen(item.id)}>
+            <Text numberOfLines={2} style={styles.productName}>
+              {item.name}
+            </Text>
+            <View style={styles.metaRow}>
+              <Text style={styles.price}>{formatCurrency(Number(item.price))}</Text>
+              <Text style={styles.stockPill}>Stok {item.stock_quantity}</Text>
+            </View>
+          </Pressable>
+          {stepper}
+        </View>
+      </View>
+    );
+  }
+
+  return (
+    <View style={[styles.cardTablet, { width: cardWidth }]}>
+      <Pressable onPress={() => onOpen(item.id)}>
+        {photo}
+        <Text numberOfLines={2} style={styles.productName}>
+          {item.name}
+        </Text>
+        <Text style={styles.price}>{formatCurrency(Number(item.price))}</Text>
+        <Text style={styles.muted}>Stok: {item.stock_quantity}</Text>
+      </Pressable>
+      {stepper}
+    </View>
+  );
+});
 
 function flattenCategories(categories: CategoryWithChildren[]) {
   const list: { id: string; name: string; parentId: string | null }[] = [];
@@ -47,7 +118,17 @@ function flattenCategories(categories: CategoryWithChildren[]) {
 export default function OrderScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const tablet = useWindowDimensions().width >= 768;
+  const { contentWidth } = useWideLayout();
+  const cartWidth = 300;
+  const showSideCart = contentWidth - cartWidth >= 640;
+  const columns = showSideCart ? (contentWidth >= 1280 ? 4 : 3) : contentWidth >= 680 ? 2 : 1;
+  const gridGap = 10;
+  const gridPad = 12;
+  const gridWidth = contentWidth - (showSideCart ? cartWidth : 0);
+  const cardWidth =
+    columns > 1
+      ? Math.floor((gridWidth - gridPad * 2 - gridGap * (columns - 1)) / columns)
+      : undefined;
   const cachedProducts = peekCache<Product[]>("products") ?? [];
   const cachedCategories = peekCache<CategoryWithChildren[]>("categories") ?? [];
   const cachedCustomers = peekCache<Customer[]>("customers") ?? [];
@@ -58,8 +139,8 @@ export default function OrderScreen() {
   const [search, setSearch] = useState("");
   const [selectedCategoryIds, setSelectedCategoryIds] = useState<string[]>([]);
   const [draftCategoryIds, setDraftCategoryIds] = useState<string[]>([]);
-  const [cart, setCart] = useState<Record<string, number>>({});
-  const [customerId, setCustomerId] = useState<string | null>(null);
+  const [cart, setCart] = useState<Record<string, number>>(draftCart);
+  const [customerId, setCustomerId] = useState<string | null>(draftCustomerId);
   const [showCustomers, setShowCustomers] = useState(false);
   const [showCart, setShowCart] = useState(false);
   const [showCategories, setShowCategories] = useState(false);
@@ -69,6 +150,17 @@ export default function OrderScreen() {
   const [detailId, setDetailId] = useState<string | null>(null);
   const detailScroll = useRef<ScrollView>(null);
   const loadGen = useRef(0);
+  const afterCartClose = useRef<(() => void) | null>(null);
+
+  useEffect(() => {
+    draftCart = cart;
+  }, [cart]);
+
+  useEffect(() => {
+    draftCustomerId = customerId;
+  }, [customerId]);
+
+  const openProduct = useCallback((id: string) => setDetailId(id), []);
 
   const refreshCatalog = useCallback(async () => {
     const gen = ++loadGen.current;
@@ -163,7 +255,58 @@ export default function OrderScreen() {
     );
   }, [customers, customerSearch]);
 
-  async function confirmOrder() {
+  async function placeOrder() {
+    setBusy(true);
+    const result = await sellOrder(
+      cartItems.map((item) => ({
+        productId: item.product.id,
+        quantity: item.quantity,
+      })),
+      {
+        customerId,
+        customerName: selectedCustomer?.name ?? null,
+      }
+    );
+    setBusy(false);
+    if (result.error) {
+      Alert.alert("Hata", result.error);
+      return;
+    }
+    const sold = new Map(cartItems.map((item) => [item.product.id, item.quantity] as const));
+    setProducts((prev) =>
+      prev.map((product) => {
+        const qty = sold.get(product.id);
+        if (!qty) return product;
+        return {
+          ...product,
+          stock_quantity: Math.max(0, product.stock_quantity - qty),
+        };
+      })
+    );
+    setCart({});
+    setCustomerId(null);
+    void refreshCatalog();
+    const invoiceId = result.invoiceId;
+    const showDone = () => {
+      Alert.alert("Tamam", result.invoiceNumber ?? "Sipariş oluştu", [
+        {
+          text: "Faturayı aç",
+          onPress: () =>
+            router.push(invoiceId ? `/faturalar/${invoiceId}` : "/faturalar"),
+        },
+        { text: "Tamam" },
+      ]);
+    };
+    if (showCart) {
+      afterCartClose.current = showDone;
+      setShowCustomers(false);
+      setShowCart(false);
+      return;
+    }
+    showDone();
+  }
+
+  function confirmOrder() {
     if (cartItems.length === 0) {
       Alert.alert("Sepet boş", "Önce ürün ekleyin");
       return;
@@ -177,48 +320,17 @@ export default function OrderScreen() {
         { text: "İptal", style: "cancel" },
         {
           text: "Onayla",
-          onPress: async () => {
-            setBusy(true);
-            const result = await sellOrder(
-              cartItems.map((item) => ({
-                productId: item.product.id,
-                quantity: item.quantity,
-              })),
-              {
-                customerId,
-                customerName: selectedCustomer?.name ?? null,
-              }
-            );
-            setBusy(false);
-            if (result.error) {
-              Alert.alert("Hata", result.error);
+          onPress: () => {
+            if (selectedCustomer) {
+              void placeOrder();
               return;
             }
-            const sold = new Map(
-              cartItems.map((item) => [item.product.id, item.quantity] as const)
-            );
-            setProducts((prev) =>
-              prev.map((product) => {
-                const qty = sold.get(product.id);
-                if (!qty) return product;
-                return {
-                  ...product,
-                  stock_quantity: Math.max(0, product.stock_quantity - qty),
-                };
-              })
-            );
-            setCart({});
-            void refreshCatalog();
-            Alert.alert("Tamam", result.invoiceNumber ?? "Sipariş oluştu", [
-              {
-                text: "Faturayı aç",
-                onPress: () =>
-                  result.invoiceId
-                    ? router.push(`/faturalar/${result.invoiceId}`)
-                    : router.push("/faturalar"),
-              },
-              { text: "Tamam" },
-            ]);
+            setTimeout(() => {
+              Alert.alert("Cari seçilmedi", "Cari seçilmedi. Onaylıyor musunuz?", [
+                { text: "Vazgeç", style: "cancel" },
+                { text: "Onayla", onPress: () => void placeOrder() },
+              ]);
+            }, 350);
           },
         },
       ]
@@ -226,8 +338,8 @@ export default function OrderScreen() {
   }
 
   const cartPanel = (
-    <View style={tablet ? styles.cartTablet : styles.cartPhone}>
-      {tablet ? <Text style={styles.cartTitle}>Sepet</Text> : null}
+    <View style={showSideCart ? styles.cartTablet : styles.cartPhone}>
+      {showSideCart ? <Text style={styles.cartTitle}>Sepet</Text> : null}
       <View style={[styles.cariBtn, !selectedCustomer && styles.cariBtnEmpty]}>
         <Pressable
           onPress={() => {
@@ -319,58 +431,19 @@ export default function OrderScreen() {
     ? flatCategories.find((c) => c.id === detailProduct.category_id)
     : null;
 
-  function renderProduct({ item }: { item: Product }) {
-    const image = resolveImageUrl(item.image_url);
-    const qty = cart[item.id] ?? 0;
-    const photo = image ? (
-      <Image source={{ uri: image }} style={tablet ? styles.image : styles.thumb} contentFit="cover" recyclingKey={item.id} />
-    ) : (
-      <View style={tablet ? styles.imageEmpty : styles.thumbEmpty}>
-        <Text style={styles.muted}>Foto yok</Text>
-      </View>
-    );
-    const stepper = (
-      <QuantityStepper
-        value={qty}
-        max={item.stock_quantity}
-        onChange={(next) => setQty(item.id, next)}
+  const renderProduct = useCallback(
+    ({ item }: { item: Product }) => (
+      <ProductCard
+        item={item}
+        qty={cart[item.id] ?? 0}
+        columns={columns}
+        cardWidth={cardWidth}
+        onOpen={openProduct}
+        onQty={setQty}
       />
-    );
-
-    if (!tablet) {
-      return (
-        <View style={styles.cardPhone}>
-          <Pressable onPress={() => setDetailId(item.id)}>{photo}</Pressable>
-          <View style={styles.cardBody}>
-            <Pressable onPress={() => setDetailId(item.id)}>
-              <Text numberOfLines={2} style={styles.productName}>
-                {item.name}
-              </Text>
-              <View style={styles.metaRow}>
-                <Text style={styles.price}>{formatCurrency(Number(item.price))}</Text>
-                <Text style={styles.stockPill}>Stok {item.stock_quantity}</Text>
-              </View>
-            </Pressable>
-            {stepper}
-          </View>
-        </View>
-      );
-    }
-
-    return (
-      <View style={styles.cardTablet}>
-        <Pressable onPress={() => setDetailId(item.id)}>
-          {photo}
-          <Text numberOfLines={2} style={styles.productName}>
-            {item.name}
-          </Text>
-          <Text style={styles.price}>{formatCurrency(Number(item.price))}</Text>
-          <Text style={styles.muted}>Stok: {item.stock_quantity}</Text>
-        </Pressable>
-        {stepper}
-      </View>
-    );
-  }
+    ),
+    [cart, columns, cardWidth, openProduct, setQty]
+  );
 
   const customerPicker = (
     <KeyboardAvoidingView style={styles.customerModal} behavior={Platform.OS === "ios" ? "padding" : undefined}>
@@ -465,14 +538,14 @@ export default function OrderScreen() {
         </View>
         <Text style={styles.categoryAction}>Seç</Text>
       </Pressable>
-      <View style={tablet ? styles.bodyTablet : styles.bodyPhone}>
+      <View style={showSideCart ? styles.bodyTablet : styles.bodyPhone}>
         <FlatList
           data={filteredProducts}
-          key={tablet ? "grid" : "list"}
+          key={`${columns}-${cardWidth ?? gridWidth}`}
           keyExtractor={(item) => item.id}
-          numColumns={tablet ? 3 : 1}
+          numColumns={columns}
           style={styles.grid}
-          columnWrapperStyle={tablet ? styles.gridRow : undefined}
+          columnWrapperStyle={columns > 1 ? styles.gridRow : undefined}
           contentContainerStyle={styles.gridContent}
           renderItem={renderProduct}
           initialNumToRender={8}
@@ -486,9 +559,9 @@ export default function OrderScreen() {
             <Text style={styles.empty}>Bu kategoride ürün yok</Text>
           }
         />
-        {tablet ? cartPanel : null}
+        {showSideCart ? cartPanel : null}
       </View>
-      {!tablet ? (
+      {!showSideCart ? (
         <View style={[styles.bottomBar, { paddingBottom: Math.max(insets.bottom, 10) }]}>
           <View style={styles.bottomTotal}>
             <Text style={styles.cariKicker}>Toplam</Text>
@@ -573,6 +646,11 @@ export default function OrderScreen() {
         onRequestClose={() => {
           if (showCustomers) setShowCustomers(false);
           else setShowCart(false);
+        }}
+        onDismiss={() => {
+          const next = afterCartClose.current;
+          afterCartClose.current = null;
+          next?.();
         }}
       >
         <View style={[styles.cartModal, { paddingTop: Math.max(insets.top, 16), paddingBottom: insets.bottom }]}>
@@ -784,13 +862,11 @@ const styles = StyleSheet.create({
   gridRow: { gap: 10 },
   gridContent: { paddingHorizontal: 12, paddingBottom: 16, paddingTop: 4, gap: 10 },
   cardTablet: {
-    flex: 1,
     backgroundColor: "#fff",
     borderRadius: 12,
     padding: 8,
     borderWidth: 1,
     borderColor: colors.line,
-    minWidth: 140,
   },
   cardPhone: {
     flexDirection: "row",

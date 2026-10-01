@@ -573,6 +573,16 @@ export async function uploadProductPhoto(productId: string, uri: string, mime?: 
   return { imageUrl: data.publicUrl };
 }
 
+export async function clearProductPhoto(productId: string) {
+  const { error } = await supabase
+    .from("products")
+    .update({ image_url: null, updated_at: new Date().toISOString() })
+    .eq("id", productId);
+  if (error) return { error: error.message };
+  invalidateCache(["products"]);
+  return { success: true };
+}
+
 export async function updateProduct(input: {
   id: string;
   name: string;

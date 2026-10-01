@@ -24,6 +24,7 @@ import {
   createAppUser,
   createCategory,
   createCustomer,
+  clearProductPhoto,
   createProduct,
   deleteAppUser,
   deleteCategory,
@@ -43,7 +44,7 @@ import {
 import { customerCode } from "../../src/lib/customer-code";
 import { colors } from "../../src/lib/theme";
 import type { AppUser, CategoryWithChildren, Customer, ProductWithCategory } from "../../src/lib/types";
-import { formatCurrency } from "../../src/lib/utils";
+import { formatCurrency, resolveImageUrl } from "../../src/lib/utils";
 
 function flattenCategories(categories: CategoryWithChildren[]) {
   const list: { id: string; name: string; parentId: string | null }[] = [];
@@ -114,6 +115,8 @@ export default function AdminScreen() {
   const [categoryPickTarget, setCategoryPickTarget] = useState<"new" | "edit" | "parent">("new");
   const [parentCategoryId, setParentCategoryId] = useState("");
   const [productPhoto, setProductPhoto] = useState<{ uri: string; mime: string } | null>(null);
+  const [editPhoto, setEditPhoto] = useState<{ uri: string; mime: string } | null>(null);
+  const [editPhotoRemoved, setEditPhotoRemoved] = useState(false);
   const [catalogBusy, setCatalogBusy] = useState(false);
 
   useEffect(() => {
@@ -230,7 +233,7 @@ export default function AdminScreen() {
     setLowStock(next.filter((item) => item.stock_quantity <= 5).length);
   }
 
-  async function pickProductPhoto(fromCamera: boolean) {
+  async function pickProductPhoto(fromCamera: boolean, target: "new" | "edit") {
     const permission = fromCamera
       ? await ImagePicker.requestCameraPermissionsAsync()
       : await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -246,13 +249,19 @@ export default function AdminScreen() {
         });
     if (result.canceled || !result.assets[0]) return;
     const asset = result.assets[0];
-    setProductPhoto({ uri: asset.uri, mime: asset.mimeType ?? "image/jpeg" });
+    const photo = { uri: asset.uri, mime: asset.mimeType ?? "image/jpeg" };
+    if (target === "edit") {
+      setEditPhoto(photo);
+      setEditPhotoRemoved(false);
+      return;
+    }
+    setProductPhoto(photo);
   }
 
-  function chooseProductPhoto() {
+  function chooseProductPhoto(target: "new" | "edit" = "new") {
     Alert.alert("Fotoğraf", "Nereden eklemek istersin?", [
-      { text: "Galeri", onPress: () => pickProductPhoto(false) },
-      { text: "Kamera", onPress: () => pickProductPhoto(true) },
+      { text: "Galeri", onPress: () => pickProductPhoto(false, target) },
+      { text: "Kamera", onPress: () => pickProductPhoto(true, target) },
       { text: "Vazgeç", style: "cancel" },
     ]);
   }
@@ -769,6 +778,9 @@ export default function AdminScreen() {
           renderItem={({ item }) => {
             const open = editingProductId === item.id;
             const draftCategory = flatCategories.find((cat) => cat.id === productDraft.categoryId);
+            const editPreview = open
+              ? editPhoto?.uri ?? (editPhotoRemoved ? null : resolveImageUrl(item.image_url))
+              : null;
             return (
               <View style={styles.userCard}>
                 <Text style={styles.userName}>{item.name}</Text>
@@ -832,6 +844,30 @@ export default function AdminScreen() {
                       </View>
                       <Text style={styles.categoryAction}>Seç</Text>
                     </Pressable>
+                    <Text style={styles.passwordLabel}>Fotoğraf</Text>
+                    <Pressable onPress={() => chooseProductPhoto("edit")} style={styles.photoPick}>
+                      {editPreview ? (
+                        <Image source={{ uri: editPreview }} style={styles.photoPreview} contentFit="cover" />
+                      ) : (
+                        <Text style={styles.photoPickText}>Fotoğraf ekle</Text>
+                      )}
+                    </Pressable>
+                    {editPreview ? (
+                      <Pressable
+                        onPress={() => {
+                          if (editPhoto) {
+                            setEditPhoto(null);
+                            return;
+                          }
+                          setEditPhotoRemoved(true);
+                        }}
+                        style={styles.photoClear}
+                      >
+                        <Text style={styles.photoClearText}>
+                          {editPhoto ? "Seçileni kaldır" : "Fotoğrafı sil"}
+                        </Text>
+                      </Pressable>
+                    ) : null}
                   </>
                 ) : null}
                 <View style={styles.userActions}>
@@ -846,24 +882,48 @@ export default function AdminScreen() {
                           return;
                         }
                         setCatalogBusy(true);
-                        const result = await updateProduct({
-                          id: item.id,
-                          name: productDraft.name,
-                          categoryId: productDraft.categoryId,
-                          price: parseFloat(productDraft.price),
-                          stockQuantity: parseInt(productDraft.stock, 10),
-                        });
-                        setCatalogBusy(false);
-                        if (result.error || !result.product) {
-                          Alert.alert("Hata", result.error ?? "Ürün güncellenemedi");
-                          return;
+                        try {
+                          const result = await updateProduct({
+                            id: item.id,
+                            name: productDraft.name,
+                            categoryId: productDraft.categoryId,
+                            price: parseFloat(productDraft.price),
+                            stockQuantity: parseInt(productDraft.stock, 10),
+                          });
+                          if (result.error || !result.product) {
+                            Alert.alert("Hata", result.error ?? "Ürün güncellenemedi");
+                            return;
+                          }
+                          let next = result.product;
+                          if (editPhoto) {
+                            const uploaded = await uploadProductPhoto(item.id, editPhoto.uri, editPhoto.mime);
+                            if (uploaded.error || !uploaded.imageUrl) {
+                              applyProductList(
+                                catalogProducts.map((product) =>
+                                  product.id === item.id ? next : product
+                                )
+                              );
+                              Alert.alert("Hata", uploaded.error ?? "Fotoğraf yüklenemedi");
+                              return;
+                            }
+                            next = { ...next, image_url: uploaded.imageUrl };
+                          } else if (editPhotoRemoved) {
+                            const cleared = await clearProductPhoto(item.id);
+                            if (cleared.error) {
+                              Alert.alert("Hata", cleared.error);
+                              return;
+                            }
+                            next = { ...next, image_url: null };
+                          }
+                          applyProductList(
+                            catalogProducts.map((product) => (product.id === item.id ? next : product))
+                          );
+                          setEditPhoto(null);
+                          setEditPhotoRemoved(false);
+                          setEditingProductId(null);
+                        } finally {
+                          setCatalogBusy(false);
                         }
-                        applyProductList(
-                          catalogProducts.map((product) =>
-                            product.id === item.id ? result.product! : product
-                          )
-                        );
-                        setEditingProductId(null);
                       }}
                     >
                       <Text style={styles.userSaveText}>Kaydet</Text>
@@ -873,6 +933,8 @@ export default function AdminScreen() {
                       style={styles.userSave}
                       onPress={() => {
                         setEditingProductId(item.id);
+                        setEditPhoto(null);
+                        setEditPhotoRemoved(false);
                         setProductDraft({
                           name: item.name,
                           price: String(item.price ?? ""),
@@ -889,6 +951,8 @@ export default function AdminScreen() {
                       style={styles.userCancel}
                       onPress={() => {
                         Keyboard.dismiss();
+                        setEditPhoto(null);
+                        setEditPhotoRemoved(false);
                         setEditingProductId(null);
                       }}
                     >
@@ -1252,7 +1316,7 @@ export default function AdminScreen() {
         </View>
         <Text style={styles.categoryAction}>Seç</Text>
       </Pressable>
-      <Pressable onPress={chooseProductPhoto} style={styles.photoPick}>
+      <Pressable onPress={() => chooseProductPhoto("new")} style={styles.photoPick}>
         {productPhoto ? (
           <Image source={{ uri: productPhoto.uri }} style={styles.photoPreview} contentFit="cover" />
         ) : (

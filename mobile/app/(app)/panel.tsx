@@ -64,9 +64,11 @@ export default function PanelScreen() {
       {invoices.slice(0, 6).map((inv) => (
         <Link key={inv.id} href={`/faturalar/${inv.id}`} asChild>
           <Pressable style={styles.card}>
-            <View>
-              <Text style={styles.name}>{inv.invoice_number}</Text>
-              <Text style={styles.muted}>
+            <View style={styles.cardBody}>
+              <Text style={styles.name} numberOfLines={1}>
+                {inv.invoice_number}
+              </Text>
+              <Text style={styles.muted} numberOfLines={1}>
                 {inv.customer_name ?? "Cari yok"} · {formatDate(inv.invoice_date ?? inv.created_at)}
               </Text>
             </View>
@@ -98,10 +100,11 @@ const styles = StyleSheet.create({
     borderColor: colors.line,
     marginBottom: 8,
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
+    gap: 10,
   },
+  cardBody: { flex: 1, minWidth: 0 },
   name: { fontWeight: "700" },
   muted: { color: colors.muted, fontSize: 12, marginTop: 2 },
-  amount: { fontWeight: "800", color: colors.navy },
+  amount: { fontWeight: "800", color: colors.navy, flexShrink: 0 },
 });

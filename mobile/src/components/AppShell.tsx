@@ -7,11 +7,11 @@ import {
   Pressable,
   StyleSheet,
   Text,
-  useWindowDimensions,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useAuth } from "../context/AuthContext";
+import { SIDEBAR_WIDTH, useWideLayout } from "../lib/layout";
 import { sx } from "../lib/style";
 import { colors } from "../lib/theme";
 
@@ -35,8 +35,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const { user, unread, logout } = useAuth();
   const pathname = usePathname();
   const router = useRouter();
-  const { width } = useWindowDimensions();
-  const tablet = width >= 768;
+  const { width, wide } = useWideLayout();
   const drawerWidth = Math.min(280, width * 0.8);
   const [menuMounted, setMenuMounted] = useState(false);
   const menuOpen = useRef(false);
@@ -79,7 +78,14 @@ export function AppShell({ children }: { children: ReactNode }) {
   }, [menuMounted, slide]);
 
   function go(href: string) {
-    closeMenu(() => router.navigate(href as never));
+    closeMenu(() => {
+      if (pathname === href) return;
+      if (pathname.startsWith(`${href}/`)) {
+        router.dismissTo(href as never);
+        return;
+      }
+      router.replace(href as never);
+    });
   }
 
   async function handleLogout() {
@@ -97,16 +103,32 @@ export function AppShell({ children }: { children: ReactNode }) {
           <Pressable
             key={link.href}
             onPress={() => go(link.href)}
-            style={sx(styles.link, active && styles.linkActive)}
+            style={({ pressed }) =>
+              sx(
+                styles.link,
+                active && styles.linkActive,
+                pressed && !active && styles.linkPressed,
+                pressed && active && styles.linkActivePressed,
+              )
+            }
           >
-            <Text style={active ? styles.linkTextActive : styles.linkText}>
-              {link.label}
-            </Text>
-            {link.href === "/mesajlar" && unread > 0 ? (
-              <View style={styles.badge}>
-                <Text style={styles.badgeText}>{unread > 9 ? "9+" : unread}</Text>
-              </View>
-            ) : null}
+            {({ pressed }) => (
+              <>
+                <Text
+                  style={[
+                    active ? styles.linkTextActive : styles.linkText,
+                    !active && pressed ? styles.linkTextPressed : null,
+                  ]}
+                >
+                  {link.label}
+                </Text>
+                {link.href === "/mesajlar" && unread > 0 ? (
+                  <View style={styles.badge}>
+                    <Text style={styles.badgeText}>{unread > 9 ? "9+" : unread}</Text>
+                  </View>
+                ) : null}
+              </>
+            )}
           </Pressable>
         );
       })}
@@ -115,7 +137,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <SafeAreaView style={styles.safe} edges={["top", "left", "right"]}>
-      {tablet ? (
+      {wide ? (
         <View style={styles.tabletRow}>
           <View style={styles.sidebar}>
             <Text style={styles.brand}>ASSOS METAL</Text>
@@ -189,7 +211,7 @@ const styles = StyleSheet.create({
   tabletRow: { flex: 1, flexDirection: "row" },
   phoneCol: { flex: 1 },
   sidebar: {
-    width: 220,
+    width: SIDEBAR_WIDTH,
     backgroundColor: colors.bar,
     paddingHorizontal: 14,
     paddingVertical: 16,
@@ -214,8 +236,11 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   linkActive: { backgroundColor: colors.gold },
+  linkPressed: { backgroundColor: "rgba(255,255,255,0.22)" },
+  linkActivePressed: { backgroundColor: "#b8962e" },
   linkText: { color: "rgba(255,255,255,0.92)", fontWeight: "600", fontSize: 16 },
-  linkTextActive: { color: "#1a1a1a" },
+  linkTextActive: { color: "#1a1a1a", fontWeight: "700", fontSize: 16 },
+  linkTextPressed: { color: colors.gold },
   badge: {
     minWidth: 18,
     height: 18,

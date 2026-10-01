@@ -1,4 +1,4 @@
-import { Redirect, Slot } from "expo-router";
+import { Redirect, Stack } from "expo-router";
 import { ActivityIndicator, View } from "react-native";
 import { AppShell } from "../../src/components/AppShell";
 import { useAuth } from "../../src/context/AuthContext";
@@ -19,7 +19,15 @@ export default function AppGroupLayout() {
 
   return (
     <AppShell>
-      <Slot />
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          animation: "fade",
+          animationDuration: 180,
+          gestureEnabled: false,
+          contentStyle: { backgroundColor: colors.bg },
+        }}
+      />
     </AppShell>
   );
 }
